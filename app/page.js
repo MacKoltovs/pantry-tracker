@@ -2,7 +2,16 @@
 import Image from 'next/image'
 import { useState, useEffect } from 'react'
 import { firestore } from '@/firebase'
-import { Box, Button, Modal, Stack, TextField, Typography } from '@mui/material'
+import {
+  Box,
+  Button,
+  InputAdornment,
+  Modal,
+  Stack,
+  TextField,
+  Typography,
+} from '@mui/material'
+import SearchIcon from '@mui/icons-material/Search'
 import {
   collection,
   deleteDoc,
@@ -18,15 +27,17 @@ export default function Home() {
   const [open, setOpen] = useState(false)
   const [itemName, setItemName] = useState('')
 
-  const updatePantry = async () => {
+  const updatePantry = async (searchValue) => {
     const snapshot = query(collection(firestore, 'pantry'))
     const docs = await getDocs(snapshot)
     const pantryList = []
     docs.forEach((doc) => {
-      pantryList.push({
-        name: doc.id,
-        ...doc.data(),
-      })
+      if (doc.id.startsWith(searchValue)) {
+        pantryList.push({
+          name: doc.id,
+          ...doc.data(),
+        })
+      }
     })
     setPantry(pantryList)
   }
@@ -44,7 +55,7 @@ export default function Home() {
       }
     }
 
-    await updatePantry()
+    await updatePantry('')
   }
 
   const addItem = async (item) => {
@@ -58,11 +69,11 @@ export default function Home() {
       await setDoc(docRef, { quantity: 1 })
     }
 
-    await updatePantry()
+    await updatePantry('')
   }
 
   useEffect(() => {
-    updatePantry()
+    updatePantry('')
   }, [])
 
   const handleOpen = () => setOpen(true)
@@ -70,7 +81,7 @@ export default function Home() {
 
   function handleSubmit(event) {
     event.preventDefault()
-    addItem(itemName)
+    addItem(itemName.toLowerCase())
     setItemName('')
     handleClose()
   }
@@ -81,7 +92,7 @@ export default function Home() {
       height="100vh"
       display="flex"
       flexDirection="column"
-      justifyContent="center"
+      pt={5}
       alignItems="center"
       gap={2}
     >
@@ -111,15 +122,7 @@ export default function Home() {
                   setItemName(e.target.value)
                 }}
               />
-              <Button
-                variant="outlined"
-                // onClick={() => {
-                //   addItem(itemName)
-                //   setItemName('')
-                //   handleClose()
-                // }}
-                type="submit"
-              >
+              <Button variant="outlined" type="submit">
                 ADD
               </Button>
             </Stack>
@@ -148,7 +151,32 @@ export default function Home() {
             Pantry Items
           </Typography>
         </Box>
-        <Stack width="800px" height="300px" spacing={2} overflow="auto">
+        <Box
+          width="100%"
+          height="40px"
+          bgcolor="lightgray"
+          display="flex"
+          justifyContent="center"
+        >
+          <Box width="50%">
+            <TextField
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon />
+                  </InputAdornment>
+                ),
+              }}
+              placeholder="Search"
+              size="small"
+              fullWidth
+              onChange={(e) => {
+                updatePantry(e.target.value.toLowerCase())
+              }}
+            ></TextField>
+          </Box>
+        </Box>
+        <Stack width="800px" minHeight="300px" spacing={2} overflow="auto">
           {pantry.map(({ name, quantity }) => (
             <Box
               key={name}
