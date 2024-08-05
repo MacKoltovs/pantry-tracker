@@ -21,6 +21,14 @@ import {
   query,
   setDoc,
 } from 'firebase/firestore'
+import {
+  createTheme,
+  responsiveFontSizes,
+  ThemeProvider,
+} from '@mui/material/styles'
+
+let theme = createTheme()
+theme = responsiveFontSizes(theme)
 
 export default function Home() {
   const [pantry, setPantry] = useState([])
@@ -87,33 +95,41 @@ export default function Home() {
   }
 
   return (
+    // Page Box
     <Box
-      width="100vw"
-      height="100vh"
+      width="100%"
+      height="100%"
       display="flex"
       flexDirection="column"
       pt={5}
+      pb={15}
       alignItems="center"
       gap={2}
+      bgcolor="#f5f5f5"
     >
-      <Modal open={open} close={handleClose}>
+      {/* Add Item Modal */}
+      <Modal open={open} onClose={handleClose}>
         <Box
           position="absolute"
           top="50%"
           left="50%"
-          width={400}
           bgcolor="white"
           border="2px solid #000"
           boxShadow={24}
           p={4}
           display="flex"
           flexDirection="column"
-          gap={3}
+          gap={2}
           sx={{ transform: 'translate(-50%,-50%)' }}
         >
           <Typography variant="h6">Add Item</Typography>
+          {/* Add Item Form */}
           <form onSubmit={handleSubmit}>
-            <Stack width="100%" direction="row" spacing={2}>
+            <Stack
+              width="100%"
+              direction={{ xs: 'column', sm: 'row' }}
+              spacing={2}
+            >
               <TextField
                 variant="outlined"
                 fullWidth
@@ -130,6 +146,115 @@ export default function Home() {
         </Box>
       </Modal>
 
+      <ThemeProvider theme={theme}>
+        {/* Bordered Box */}
+        <Box border="1px solid #333" minWidth="45%" maxWidth="80%">
+          {/* Title Box */}
+          <Box
+            height="100px"
+            bgcolor="#31a370"
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
+            px={2}
+          >
+            <Typography variant="h2" color="#333">
+              Pantry Items
+            </Typography>
+          </Box>
+
+          {/* Search Bar Box */}
+          <Box
+            width="100%"
+            height="40px"
+            bgcolor="lightgray"
+            display="flex"
+            justifyContent="center"
+          >
+            {/* Search Field Box */}
+            <Box width="50%">
+              <TextField
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon />
+                    </InputAdornment>
+                  ),
+                }}
+                placeholder="Search"
+                size="small"
+                fullWidth
+                onChange={(e) => {
+                  updatePantry(e.target.value.toLowerCase())
+                }}
+              />
+            </Box>
+          </Box>
+
+          {/* Pantry Items Stack */}
+          <Stack width="100%" minHeight="300px" spacing={0.5} overflow="auto">
+            {pantry.map(({ name, quantity }) => (
+              // Item Box
+              <Box
+                key={name}
+                width="100%"
+                minHeight="150px"
+                display="flex"
+                alignItems="center"
+                justifyContent="space-between"
+                bgcolor="#b8b8b8"
+                sx={{
+                  flexDirection: { xs: 'column', md: 'row' },
+                  padding: { xs: 1.5, md: 5 },
+                }}
+              >
+                <Typography
+                  variant="h3"
+                  color="#333"
+                  textAlign="center"
+                  width="250px"
+                  overflow="auto"
+                  sx={{ pb: { xs: '10px', md: 0 } }}
+                >
+                  {name.charAt(0).toUpperCase() + name.slice(1)}
+                </Typography>
+
+                <Typography
+                  variant="h3"
+                  color="#333"
+                  textAlign="center"
+                  sx={{ pb: { xs: '10px', md: 0 } }}
+                >
+                  {quantity}
+                </Typography>
+
+                {/* Add/Remove Buttons Stack */}
+                <Stack direction="row" spacing={2} pl="30px">
+                  <Button
+                    variant="contained"
+                    onClick={() => {
+                      addItem(name)
+                    }}
+                  >
+                    Add
+                  </Button>
+
+                  <Button
+                    variant="contained"
+                    onClick={() => {
+                      removeItem(name)
+                    }}
+                  >
+                    Remove
+                  </Button>
+                </Stack>
+              </Box>
+            ))}
+          </Stack>
+        </Box>
+      </ThemeProvider>
+
+      {/* Open Add Item Form */}
       <Button
         variant="contained"
         onClick={() => {
@@ -138,84 +263,6 @@ export default function Home() {
       >
         Add New Item
       </Button>
-      <Box border="1px solid #333">
-        <Box
-          width="800px"
-          height="100px"
-          bgcolor="#ADD8E6"
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
-        >
-          <Typography variant="h2" color="#333">
-            Pantry Items
-          </Typography>
-        </Box>
-        <Box
-          width="100%"
-          height="40px"
-          bgcolor="lightgray"
-          display="flex"
-          justifyContent="center"
-        >
-          <Box width="50%">
-            <TextField
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon />
-                  </InputAdornment>
-                ),
-              }}
-              placeholder="Search"
-              size="small"
-              fullWidth
-              onChange={(e) => {
-                updatePantry(e.target.value.toLowerCase())
-              }}
-            ></TextField>
-          </Box>
-        </Box>
-        <Stack width="800px" minHeight="300px" spacing={2} overflow="auto">
-          {pantry.map(({ name, quantity }) => (
-            <Box
-              key={name}
-              width="100%"
-              minHeight="150px"
-              display="flex"
-              alignItems="center"
-              justifyContent="space-between"
-              color="#f0f0f0"
-              padding={5}
-            >
-              <Typography variant="h3" color="#333" textAlign="center">
-                {name.charAt(0).toUpperCase() + name.slice(1)}
-              </Typography>
-              <Typography variant="h3" color="#333" textAlign="center">
-                {quantity}
-              </Typography>
-              <Stack direction="row" spacing={2}>
-                <Button
-                  variant="contained"
-                  onClick={() => {
-                    addItem(name)
-                  }}
-                >
-                  Add
-                </Button>
-                <Button
-                  variant="contained"
-                  onClick={() => {
-                    removeItem(name)
-                  }}
-                >
-                  Remove
-                </Button>
-              </Stack>
-            </Box>
-          ))}
-        </Stack>
-      </Box>
     </Box>
   )
 }
