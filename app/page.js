@@ -191,6 +191,21 @@ export default function Home() {
             </Box>
           </Box>
 
+          <Box
+            px="18%"
+            // width="75%"
+            alignItems="center"
+            display="flex"
+            border="1px solid black"
+            sx={{
+              flexDirection: { xs: 'column', md: 'row' },
+              height: { xs: '50px', md: '30px' },
+            }}
+          >
+            <Typography sx={{ pr: { xs: '0%', md: '43%' } }}>Item</Typography>
+            <Typography>Quantity</Typography>
+          </Box>
+
           {/* Pantry Items Stack */}
           <Stack width="100%" minHeight="300px" spacing={0.5} overflow="auto">
             {pantry.map(({ name, quantity }) => (
